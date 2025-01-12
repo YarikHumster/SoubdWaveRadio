@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="?android:attr/buttonBarStyle"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:weightSum="2">
+
+    <Button
+        android:id="@+id/settingsButton"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="138dp"
+        android:layout_margin="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/radius_corner"
+        android:text="@string/fragment_settings_title"
+        android:textAlignment="center"
+        android:textAppearance="@style/AlertDialog.TextColor"
+        android:textSize="21sp"
+        app:icon="@drawable/ic_settings_24dp"
+        app:iconSize="32dp" />
+
+    <Button
+        android:id="@+id/equalizerButton"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="138dp"
+        android:layout_margin="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/radius_corner"
+        android:text="@string/pref_equalizer_main"
+        android:textAlignment="center"
+        android:textAppearance="@style/AlertDialog.TextColor"
+        android:textSize="19sp"
+        app:icon="@drawable/ic_equalizer_24"
+        android:visibility="gone"
+        android:clickable="false"
+        app:iconSize="32dp" />
+
+</LinearLayout>

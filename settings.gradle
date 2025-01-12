@@ -1,0 +1,32 @@
+pluginManagement {
+    repositories {
+        maven { setUrl("https://artifactory-external.vkpartner.ru/artifactory/maven/") }
+        maven { url 'https://android-sdk.is.com/'}
+        maven { url "https://sdk.tapjoy.com/"}
+        maven { url 'https://artifact.bytedance.com/repository/pangle' }
+        maven { url "https://dl-maven-android.mintegral.com/repository/mbridge_android_sdk_oversea" }
+        maven { url "https://cboost.jfrog.io/artifactory/chartboost-ads/" }
+        maven { url "https://dl.appnext.com/" }
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        mavenLocal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        maven { setUrl("https://artifactory-external.vkpartner.ru/artifactory/maven/") }
+        maven { url 'https://android-sdk.is.com/' }
+        maven { url "https://sdk.tapjoy.com/" }
+        maven { url 'https://artifact.bytedance.com/repository/pangle' }
+        maven { url "https://dl-maven-android.mintegral.com/repository/mbridge_android_sdk_oversea" }
+        maven { url "https://cboost.jfrog.io/artifactory/chartboost-ads/" }
+        maven { url "https://dl.appnext.com/" }
+        google()
+        mavenCentral()
+        mavenLocal()
+    }
+}
+rootProject.name = "URL-Radio"
+include ':app'

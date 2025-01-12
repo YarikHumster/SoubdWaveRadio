@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "815835836893",
+    "project_id": "soundwave-9c30c",
+    "storage_bucket": "soundwave-9c30c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:815835836893:android:982529e4339fcc4cae0634",
+        "android_client_info": {
+          "package_name": "com.yaros.RadioUrl"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8LxXonrqBx8JgSP9o35bw87Zlcp4k2uc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:815835836893:android:b0b75b27f68e4bf9ae0634",
+        "android_client_info": {
+          "package_name": "com.yaros.RadioUrl.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8LxXonrqBx8JgSP9o35bw87Zlcp4k2uc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

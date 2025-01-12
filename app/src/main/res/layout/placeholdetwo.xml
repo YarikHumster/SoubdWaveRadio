@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="?android:attr/buttonBarStyle"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:weightSum="2">
+
+    <Button
+        android:id="@+id/favoriteButton"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="138dp"
+        android:layout_margin="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/radius_corner"
+        android:lines="2"
+        android:singleLine="false"
+        android:text="@string/liked_song"
+        android:textAlignment="center"
+        android:textAppearance="@style/AlertDialog.TextColor"
+        android:textSize="21sp"
+        app:icon="@drawable/icon_like"
+        app:iconSize="32dp" />
+
+</LinearLayout>
