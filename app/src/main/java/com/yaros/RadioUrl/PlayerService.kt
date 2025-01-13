@@ -66,7 +66,8 @@ class PlayerService : MediaLibraryService() {
     private val TAG: String = PlayerService::class.java.simpleName
     private lateinit var player: Player
     private lateinit var mediaLibrarySession: MediaLibrarySession
-    private lateinit var sleepTimer: CountDownTimer
+    private var sleepHandler = Handler(Looper.getMainLooper())
+    private var sleepRunnable: Runnable? = null
     var sleepTimerTimeRemaining: Long = 0L
     private var sleepTimerEndTime: Long = 0L
     private val librarySessionCallback = CustomMediaLibrarySessionCallback()
@@ -83,6 +84,11 @@ class PlayerService : MediaLibraryService() {
         super.onCreate()
         Timber.tag(TAG).d("onCreatePlayerService: Start")  // Логирование для отслеживания
         val notification = createNotification(notificationChannelId)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(Intent(this, PlayerService::class.java))
+        } else {
+            startService(Intent(this, PlayerService::class.java))
+        }
         startForeground(notificationId, notification)
         collection = FileHelper.readCollection(this)
         LocalBroadcastManager.getInstance(application).registerReceiver(
@@ -97,25 +103,25 @@ class PlayerService : MediaLibraryService() {
         metadataHistory = PreferencesHelper.loadMetadataHistory()
     }
 
-    private fun createNotification(channelId: String): Notification {
-        // Создание канала уведомлений для Android O и выше
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(
-                channelId,
-                "PlayerService",
-                NotificationManager.IMPORTANCE_LOW
-            )
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            manager.createNotificationChannel(notificationChannel)
+    private fun createNotificationChannel() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val channel = NotificationChannel(
+            notificationChannelId,
+            "PlayerService",
+            NotificationManager.IMPORTANCE_LOW
+        )
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.createNotificationChannel(channel)
         }
+    }
 
-        // Создание основного уведомления
-        return NotificationCompat.Builder(this, channelId)
-            .setContentTitle(getString(R.string.player_ready_notification))
-            .setContentText(getString(R.string.player_ready_notification_midl))
-            .setSmallIcon(R.drawable.ic_notification_app_icon_white_24dp)
-            .setPriority(NotificationCompat.PRIORITY_MIN)
-            .build()
+    private fun createNotification(channelId: String): Notification {
+    return NotificationCompat.Builder(this, channelId)
+        .setContentTitle(getString(R.string.player_ready_notification))
+        .setContentText(getString(R.string.player_ready_notification_midl))
+        .setSmallIcon(R.drawable.ic_notification_app_icon_white_24dp)
+        .setPriority(NotificationCompat.PRIORITY_MIN)
+        .build()
     }
 
     override fun onDestroy() {
