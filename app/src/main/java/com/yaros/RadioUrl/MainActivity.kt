@@ -60,23 +60,7 @@ class MainActivity : AppCompatActivity() {
         reviewManager = ReviewManager(this)
         reviewManager.initialize()
 
-        if (!hasNotificationPermission(this)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                requestNotificationPermission(this)
-            }
-        }
-        if (!BackgroundPermissionHelper.isIgnoringBatteryOptimizations(this)) {
-            BackgroundPermissionHelper.showBackgroundPermissionDialogIfNeeded(
-                this,
-                onAccept = {
-                    BackgroundPermissionHelper.requestIgnoreBatteryOptimizations(this)
-                },
-                onDecline = {
-                    // Здесь можно показать сообщение о том, что некоторые функции могут работать некорректно
-                    Toast.makeText(this, "Некоторые функции могут работать некорректно без разрешения", Toast.LENGTH_LONG).show()
-                }
-            )
-        }
+       PermissionHelper.checkAllPermissions(this)
 
         FileHelper.createNomediaFile(getExternalFilesDir(null))
         setSupportActionBar(findViewById(R.id.main_toolbar))
@@ -151,35 +135,18 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-    private fun hasNotificationPermission(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            NotificationManagerCompat.from(context).areNotificationsEnabled()
-        } else {
-            val notificationManager =
-                context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                notificationManager.areNotificationsEnabled()
-            } else {
-                // Для версий ниже N, возвращаем true, так как до Android N не было возможности отключить уведомления на уровне системы
-                true
-            }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        
+        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == BackgroundPermissionHelper.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) {
-            if (BackgroundPermissionHelper.isIgnoringBatteryOptimizations(this)) {
-                // Разрешение получено
+        if (requestCode == PermissionHelper.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) {
+            if (PermissionHelper.isIgnoringBatteryOptimizations(this)) {
                 Toast.makeText(this, R.string.battary_no_function, Toast.LENGTH_SHORT).show()
             } else {
-                // Разрешение не получено
                 AlertDialog.Builder(this)
                     .setTitle(R.string.battary_no)
                     .setMessage(R.string.battery_no_message)
                     .setPositiveButton(R.string.dialog_yes_no_positive_button_default) { _, _ ->
-                        BackgroundPermissionHelper.openBatteryOptimizationSettings(this)
+                        PermissionHelper.openBatteryOptimizationSettings(this)
                     }
                     .setNegativeButton(R.string.dialog_generic_button_cancel) { _, _ ->
                         Toast.makeText(this, R.string.battery_reload, Toast.LENGTH_LONG).show()
@@ -187,26 +154,4 @@ class MainActivity : AppCompatActivity() {
                     .show()
             }
         }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun requestNotificationPermission(context: Context) {
-        if (!hasNotificationPermission(context)) {
-            AlertDialog.Builder(context)
-                .setTitle(R.string.notification)
-                .setMessage(R.string.notification_info)
-                .setPositiveButton(R.string.setting) { _, _ ->
-                    val intent = Intent().apply {
-                        action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            putExtra(Settings.EXTRA_CHANNEL_ID, context.applicationInfo.uid)
-                        }
-                    }
-                    context.startActivity(intent)
-                }
-                .setNegativeButton(R.string.dialog_generic_button_cancel, null)
-                .show()
-        }
-    }
 }
