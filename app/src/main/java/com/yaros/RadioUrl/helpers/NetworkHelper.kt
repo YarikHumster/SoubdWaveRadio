@@ -47,7 +47,10 @@ object NetworkHelper {
         return activeNetwork != null
     }
 
-    suspend fun detectContentType(urlString: String): ContentType {
+    suspend fun detectContentType(context: Context, urlString: String): ContentType {
+        if (!isConnectedToNetwork(context)) {
+            throw IOException("No internet connection")
+        }
         return suspendCoroutine { cont ->
             val request = Request.Builder().url(urlString).build()
             client.newCall(request).enqueue(object : Callback {
@@ -87,7 +90,10 @@ object NetworkHelper {
         }
     }
 
-    suspend fun downloadPlaylist(playlistUrlString: String): List<String> {
+    suspend fun downloadPlaylist(context: Context, playlistUrlString: String): List<String> {
+        if (!isConnectedToNetwork(context)) {
+            throw IOException("No internet connection")
+        }
         return suspendCoroutine { cont ->
             val request = Request.Builder().url(playlistUrlString).build()
             client.newCall(request).enqueue(object : Callback {
@@ -110,9 +116,11 @@ object NetworkHelper {
         }
     }
 
-    suspend fun detectContentTypeSuspended(urlString: String): ContentType {
+    suspend fun detectContentTypeSuspended(context: Context, urlString: String): ContentType {
+        if (!isConnectedToNetwork(context)) {
+            throw IOException("No internet connection")
+        }
         return suspendCoroutine { cont ->
-            // Используем асинхронный метод detectContentType
             client.newCall(Request.Builder().url(urlString).build()).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     Timber.tag(TAG).e("Error fetching content type: ${e.message}")
@@ -152,17 +160,15 @@ object NetworkHelper {
 
     suspend fun getRadioBrowserServerSuspended(): String {
         return suspendCoroutine { cont ->
-            val serverAddress: String = try {
-                val serverAddressList: Array<InetAddress> =
-                    InetAddress.getAllByName(Keys.RADIO_BROWSER_API_BASE)
-                serverAddressList[Random().nextInt(serverAddressList.size)].canonicalHostName
+            try {
+                val serverAddressList: Array<InetAddress> = InetAddress.getAllByName(Keys.RADIO_BROWSER_API_BASE)
+                val serverAddress = serverAddressList[Random().nextInt(serverAddressList.size)].canonicalHostName
+                PreferencesHelper.saveRadioBrowserApiAddress(serverAddress)
+                cont.resume(serverAddress)
             } catch (e: UnknownHostException) {
-                Keys.RADIO_BROWSER_API_DEFAULT
+                Timber.tag(TAG).e("Error resolving server address: ${e.message}")
+                cont.resumeWithException(e)
             }
-            PreferencesHelper.saveRadioBrowserApiAddress(serverAddress)
-            cont.resume(serverAddress)
         }
     }
 }
-
-
