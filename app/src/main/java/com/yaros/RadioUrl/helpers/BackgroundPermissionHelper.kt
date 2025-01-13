@@ -14,20 +14,21 @@ object BackgroundPermissionHelper {
 
     private const val PREF_NAME = "BackgroundPermissionPref"
     private const val PREF_KEY_DIALOG_SHOWN = "dialog_shown"
+    const val REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 1001
 
     fun isIgnoringBatteryOptimizations(context: Context): Boolean {
-        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        val packageName = context.packageName
-        return powerManager.isIgnoringBatteryOptimizations(packageName)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            return powerManager.isIgnoringBatteryOptimizations(context.packageName)
+        }
+        return false
     }
 
     @SuppressLint("BatteryLife")
     fun requestIgnoreBatteryOptimizations(activity: AppCompatActivity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val intent = Intent().apply {
-                action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                data = Uri.parse("package:${activity.packageName}")
-            }
+            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                .setData(Uri.parse("package:${activity.packageName}"))
             activity.startActivityForResult(intent, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
         }
     }
@@ -59,6 +60,4 @@ object BackgroundPermissionHelper {
                 .show()
         }
     }
-
-    const val REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 1001
 }
