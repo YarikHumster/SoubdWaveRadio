@@ -8,11 +8,13 @@ import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManagerFactory
 import ru.rustore.sdk.review.RuStoreReviewManagerFactory
 import timber.log.Timber
+import com.google.firebase.analytics.FirebaseAnalytics
 
 class ReviewManager(private val context: Context) {
 
     private val sharedPreferences: SharedPreferences = context.getSharedPreferences("ReviewPrefs", Context.MODE_PRIVATE)
     private val handler = Handler(Looper.getMainLooper())
+    private val firebaseAnalytics = FirebaseAnalytics.getInstance(context)
 
     companion object {
         private const val KEY_REVIEW_SHOWN = "review_shown"
@@ -57,7 +59,7 @@ class ReviewManager(private val context: Context) {
     @Suppress("DEPRECATION")
     private fun getInstallSource(): InstallSource {
         val packageManager = context.packageManager
-        val installerPackageName = packageManager.getInstallerPackageName(context.packageName)
+        val installerPackageName = packageManager.getInstallerPackageName(context.packageName) ?: ""
 
         return when (installerPackageName) {
             "com.android.vending" -> InstallSource.GOOGLE_PLAY
@@ -72,12 +74,18 @@ class ReviewManager(private val context: Context) {
         requestReviewFlow.addOnCompleteListener { request ->
             if (request.isSuccessful) {
                 val reviewInfo: ReviewInfo = request.result
+                logReviewShownEvent("Google Play")
                 val flow = reviewManager.launchReviewFlow(context as android.app.Activity, reviewInfo)
                 flow.addOnCompleteListener {
-                    // Отметить, что экран оценки был показан
                     sharedPreferences.edit().putBoolean(KEY_REVIEW_SHOWN, true).apply()
+                    logReviewCompletedEvent("Google Play")
                 }
+            } else {
+                logReviewErrorEvent("Google Play", request.exception ?: Exception("Unknown error"))
             }
+        }
+        requestReviewFlow.addOnFailureListener { exception ->
+            logReviewErrorEvent("Google Play", exception)
         }
     }
 
@@ -85,16 +93,48 @@ class ReviewManager(private val context: Context) {
         val ruStoreReviewManager = RuStoreReviewManagerFactory.create(context)
         ruStoreReviewManager.requestReviewFlow()
             .addOnSuccessListener { reviewInfo ->
+                logReviewShownEvent("RuStore")
                 ruStoreReviewManager.launchReviewFlow(reviewInfo)
                     .addOnSuccessListener {
-                        // Отметить, что экран оценки был показан
                         sharedPreferences.edit().putBoolean(KEY_REVIEW_SHOWN, true).apply()
+                        logReviewCompletedEvent("RuStore")
+                    }
+                    .addOnFailureListener { exception ->
+                        logReviewErrorEvent("RuStore", exception)
                     }
             }
             .addOnFailureListener { exception ->
-                // Обработка ошибки
-                Timber.tag("ReviewManager").e(exception, "Failed to request review flow")
+                logReviewErrorEvent("RuStore", exception)
             }
+    }
+
+    private fun logReviewShownEvent(source: String) {
+        val bundle = Bundle()
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "review_shown")
+        bundle.putString("source", source)
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SHOW_REVIEW, bundle)
+    }
+
+    private fun logReviewCompletedEvent(source: String) {
+        val bundle = Bundle()
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "review_completed")
+        bundle.putString("source", source)
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.REVIEW, bundle)
+    }
+
+    private fun logReviewDeclinedEvent(source: String) {
+        val bundle = Bundle()
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "review_declined")
+        bundle.putString("source", source)
+        firebaseAnalytics.logEvent("review_declined", bundle)
+    }
+
+    private fun logReviewErrorEvent(source: String, exception: Exception) {
+        val bundle = Bundle()
+        bundle.putString(FirebaseAnalytics.Param.EXCEPTION_CLASS, exception.javaClass.name)
+        bundle.putString(FirebaseAnalytics.Param.EXCEPTION_MESSAGE, exception.message)
+        bundle.putString("source", source)
+        firebaseAnalytics.logEvent("review_error", bundle)
     }
 
     enum class InstallSource {
