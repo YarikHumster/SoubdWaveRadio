@@ -1,5 +1,3 @@
-package com.yaros.RadioUrl.helpers
-
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
@@ -35,16 +33,21 @@ object NetworkHelper {
         OkHttpClient.Builder()
             .sslSocketFactory(sslContext.socketFactory, trustAllCerts[0] as X509TrustManager)
             .protocols(listOf(Protocol.HTTP_1_1))
-            .hostnameVerifier { hostname, session -> true } // Игнорируем проверку имени хоста
+            .hostnameVerifier { hostname, session -> true } // Ignore hostname verification
             .build()
     }
 
-    data class ContentType(var type: String = String(), var charset: String = String())
+    data class ContentType(var type: String = "", var charset: String = "")
 
     fun isConnectedToNetwork(context: Context): Boolean {
-        val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: Network? = connMgr.activeNetwork
-        return activeNetwork != null
+        return try {
+            val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val activeNetwork: Network? = connMgr.activeNetwork
+            activeNetwork != null
+        } catch (e: Exception) {
+            Timber.tag(TAG).e("Error checking network connection: ${e.message}")
+            false
+        }
     }
 
     suspend fun detectContentType(context: Context, urlString: String): ContentType {
@@ -55,13 +58,17 @@ object NetworkHelper {
             val request = Request.Builder().url(urlString).build()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    Timber.tag(TAG).e("Error fetching content type: ${e.message}")
+                    when (e) {
+                        is SocketTimeoutException -> Timber.tag(TAG).e("Socket timeout: ${e.message}")
+                        is ConnectException -> Timber.tag(TAG).e("Connection error: ${e.message}")
+                        else -> Timber.tag(TAG).e("General IO error: ${e.message}")
+                    }
                     cont.resumeWithException(e)
                 }
 
                 override fun onResponse(call: Call, response: Response) {
                     val contentType = ContentType(Keys.MIME_TYPE_UNSUPPORTED, Keys.CHARSET_UNDEFINDED)
-                    val contentTypeHeader: String = response.header("Content-Type") ?: String()
+                    val contentTypeHeader: String = response.header("Content-Type") ?: ""
                     Timber.tag(TAG).v("Raw content type header: $contentTypeHeader")
                     val contentTypeHeaderParts: List<String> = contentTypeHeader.split(";")
                     contentTypeHeaderParts.forEachIndexed { index, part ->
@@ -98,7 +105,11 @@ object NetworkHelper {
             val request = Request.Builder().url(playlistUrlString).build()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    Timber.tag(TAG).e("Error downloading playlist: ${e.message}")
+                    when (e) {
+                        is SocketTimeoutException -> Timber.tag(TAG).e("Socket timeout: ${e.message}")
+                        is ConnectException -> Timber.tag(TAG).e("Connection error: ${e.message}")
+                        else -> Timber.tag(TAG).e("General IO error: ${e.message}")
+                    }
                     cont.resumeWithException(e)
                 }
 
@@ -123,13 +134,17 @@ object NetworkHelper {
         return suspendCoroutine { cont ->
             client.newCall(Request.Builder().url(urlString).build()).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    Timber.tag(TAG).e("Error fetching content type: ${e.message}")
+                    when (e) {
+                        is SocketTimeoutException -> Timber.tag(TAG).e("Socket timeout: ${e.message}")
+                        is ConnectException -> Timber.tag(TAG).e("Connection error: ${e.message}")
+                        else -> Timber.tag(TAG).e("General IO error: ${e.message}")
+                    }
                     cont.resumeWithException(e)
                 }
 
                 override fun onResponse(call: Call, response: Response) {
                     val contentType = ContentType(Keys.MIME_TYPE_UNSUPPORTED, Keys.CHARSET_UNDEFINDED)
-                    val contentTypeHeader: String = response.header("Content-Type") ?: String()
+                    val contentTypeHeader: String = response.header("Content-Type") ?: ""
                     Timber.tag(TAG).v("Raw content type header: $contentTypeHeader")
                     val contentTypeHeaderParts: List<String> = contentTypeHeader.split(";")
                     contentTypeHeaderParts.forEachIndexed { index, part ->
@@ -167,6 +182,12 @@ object NetworkHelper {
                 cont.resume(serverAddress)
             } catch (e: UnknownHostException) {
                 Timber.tag(TAG).e("Error resolving server address: ${e.message}")
+                cont.resumeWithException(e)
+            } catch (e: SecurityException) {
+                Timber.tag(TAG).e("Security exception: ${e.message}")
+                cont.resumeWithException(e)
+            } catch (e: Exception) {
+                Timber.tag(TAG).e("General exception: ${e.message}")
                 cont.resumeWithException(e)
             }
         }
