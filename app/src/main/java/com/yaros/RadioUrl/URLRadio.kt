@@ -25,6 +25,30 @@ class URLRadio : Application() {
         adManager = AdManager(this)
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
         ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleObserver)
+
+        // Check if the event has been sent already
+        if (!PreferencesHelper.isStoreInstallEventSent()) {
+            val installerPackage = packageManager.getInstallerPackageName(packageName)
+            val storeName = getStoreName(installerPackage)
+            firebaseAnalytics?.logEvent("app_install_source") {
+                param("store_name", storeName)
+            }
+            // Set the flag to true
+            PreferencesHelper.setStoreInstallEventSent(true)
+        }
+    }
+
+     private fun getStoreName(installerPackage: String?): String {
+        return when (installerPackage) {
+            "com.android.vending" -> "Google Play Store"
+            "com.amazon.venezia" -> "Amazon Appstore"
+            "com.opera.appstore" -> "Opera Mobile Store"
+            "com.nokia.installer" -> "Nokia Store"
+            "com.asus.android.appstore" -> "ASUS App Store"
+            "com.sec.android.app.samsungappstore" -> "Samsung Galaxy Store"
+            "com.lenovo.lenovostore" -> "Lenovo App Store"
+            else -> "Unknown or direct install"
+        }
     }
 
     var lifecycleObserver: LifecycleObserver = object : DefaultLifecycleObserver {
