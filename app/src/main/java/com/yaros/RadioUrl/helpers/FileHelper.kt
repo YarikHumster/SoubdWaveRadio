@@ -6,7 +6,6 @@ import android.database.Cursor
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.util.Log
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.google.gson.Gson
