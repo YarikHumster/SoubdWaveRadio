@@ -2,6 +2,7 @@ package com.yaros.RadioUrl.ui
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import com.google.android.play.core.review.ReviewInfo
@@ -100,11 +101,11 @@ class ReviewManager(private val context: Context) {
                         logReviewCompletedEvent("RuStore")
                     }
                     .addOnFailureListener { exception ->
-                        logReviewErrorEvent("RuStore", exception)
+                        logReviewErrorEvent("RuStore", exception as Exception)
                     }
             }
             .addOnFailureListener { exception ->
-                logReviewErrorEvent("RuStore", exception)
+                logReviewErrorEvent("RuStore", exception as Exception)
             }
     }
 
@@ -112,14 +113,14 @@ class ReviewManager(private val context: Context) {
         val bundle = Bundle()
         bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "review_shown")
         bundle.putString("source", source)
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SHOW_REVIEW, bundle)
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_PROMOTION, bundle)
     }
 
     private fun logReviewCompletedEvent(source: String) {
         val bundle = Bundle()
         bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "review_completed")
         bundle.putString("source", source)
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.REVIEW, bundle)
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_PROMOTION, bundle)
     }
 
     private fun logReviewDeclinedEvent(source: String) {
@@ -131,8 +132,8 @@ class ReviewManager(private val context: Context) {
 
     private fun logReviewErrorEvent(source: String, exception: Exception) {
         val bundle = Bundle()
-        bundle.putString(FirebaseAnalytics.Param.EXCEPTION_CLASS, exception.javaClass.name)
-        bundle.putString(FirebaseAnalytics.Param.EXCEPTION_MESSAGE, exception.message)
+        bundle.putString(FirebaseAnalytics.Param.VALUE, exception.javaClass.name)
+        bundle.putString(FirebaseAnalytics.Param.VALUE, exception.message)
         bundle.putString("source", source)
         firebaseAnalytics.logEvent("review_error", bundle)
     }

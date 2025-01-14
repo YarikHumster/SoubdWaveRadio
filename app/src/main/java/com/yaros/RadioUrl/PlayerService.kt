@@ -66,8 +66,7 @@ class PlayerService : MediaLibraryService() {
     private val TAG: String = PlayerService::class.java.simpleName
     private lateinit var player: Player
     private lateinit var mediaLibrarySession: MediaLibrarySession
-    private var sleepHandler = Handler(Looper.getMainLooper())
-    private var sleepRunnable: Runnable? = null
+    private lateinit var sleepTimer: CountDownTimer
     var sleepTimerTimeRemaining: Long = 0L
     private var sleepTimerEndTime: Long = 0L
     private val librarySessionCallback = CustomMediaLibrarySessionCallback()
@@ -84,11 +83,6 @@ class PlayerService : MediaLibraryService() {
         super.onCreate()
         Timber.tag(TAG).d("onCreatePlayerService: Start")  // Логирование для отслеживания
         val notification = createNotification(notificationChannelId)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(Intent(this, PlayerService::class.java))
-        } else {
-            startService(Intent(this, PlayerService::class.java))
-        }
         startForeground(notificationId, notification)
         collection = FileHelper.readCollection(this)
         LocalBroadcastManager.getInstance(application).registerReceiver(
@@ -103,25 +97,25 @@ class PlayerService : MediaLibraryService() {
         metadataHistory = PreferencesHelper.loadMetadataHistory()
     }
 
-    private fun createNotificationChannel() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val channel = NotificationChannel(
-            notificationChannelId,
-            "PlayerService",
-            NotificationManager.IMPORTANCE_LOW
-        )
-        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.createNotificationChannel(channel)
-        }
-    }
-
     private fun createNotification(channelId: String): Notification {
-    return NotificationCompat.Builder(this, channelId)
-        .setContentTitle(getString(R.string.player_ready_notification))
-        .setContentText(getString(R.string.player_ready_notification_midl))
-        .setSmallIcon(R.drawable.ic_notification_app_icon_white_24dp)
-        .setPriority(NotificationCompat.PRIORITY_MIN)
-        .build()
+        // Создание канала уведомлений для Android O и выше
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                channelId,
+                "PlayerService",
+                NotificationManager.IMPORTANCE_LOW
+            )
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.createNotificationChannel(notificationChannel)
+        }
+
+        // Создание основного уведомления
+        return NotificationCompat.Builder(this, channelId)
+            .setContentTitle(getString(R.string.player_ready_notification))
+            .setContentText(getString(R.string.player_ready_notification_midl))
+            .setSmallIcon(R.drawable.ic_notification_app_icon_white_24dp)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .build()
     }
 
     override fun onDestroy() {
@@ -210,18 +204,37 @@ class PlayerService : MediaLibraryService() {
         return builder.build()
     }
 
-    fun startSleepTimer(selectedTimeMillis: Long) {
-        sleepHandler.removeCallbacks(sleepRunnable)
-        sleepRunnable = Runnable {
-            player.stop()
-            // Additional logic
+    private fun startSleepTimer(selectedTimeMillis: Long) {
+        if (sleepTimerTimeRemaining > 0L && this::sleepTimer.isInitialized) {
+            sleepTimer.cancel()
         }
-        sleepHandler.postDelayed(sleepRunnable!!, selectedTimeMillis)
+
+        sleepTimerEndTime = System.currentTimeMillis() + selectedTimeMillis
+
+        sleepTimer = object : CountDownTimer(selectedTimeMillis, 1000) {
+            override fun onFinish() {
+                Timber.tag(TAG).v("Sleep timer finished. Sweet dreams.")
+                sleepTimerTimeRemaining = 0L
+                player.stop()
+            }
+
+            override fun onTick(millisUntilFinished: Long) {
+                sleepTimerTimeRemaining = millisUntilFinished
+            }
+        }
+        sleepTimer.start()
+        PreferencesHelper.saveSleepTimerRunning(isRunning = true)
     }
 
-    fun cancelSleepTimer() {
-        sleepHandler.removeCallbacks(sleepRunnable)
-        sleepRunnable = null
+    private fun cancelSleepTimer() {
+        if (this::sleepTimer.isInitialized) {
+            if (manuallyCancelledSleepTimer) {
+                sleepTimerTimeRemaining = 0L
+                sleepTimer.cancel()
+            }
+            manuallyCancelledSleepTimer = false
+        }
+        PreferencesHelper.saveSleepTimerRunning(isRunning = false)
     }
 
     fun manuallyCancelSleepTimer() {
@@ -257,32 +270,29 @@ class PlayerService : MediaLibraryService() {
         }
     }
 
-    private inner class CustomMediaLibrarySessionCallback : MediaLibrarySession.Callback() {
-
-        override fun onCustomCommand(
-            session: MediaSession,
+    private inner class CustomMediaLibrarySessionCallback : MediaLibrarySession.Callback {
+        override fun onAddMediaItems(
+            mediaSession: MediaSession,
             controller: MediaSession.ControllerInfo,
-            customCommand: SessionCommand,
-            args: Bundle
-        ): ListenableFuture<SessionResult> {
-            return when (customCommand.customAction) {
-                Keys.CMD_START_SLEEP_TIMER -> handleStartSleepTimer(args)
-                Keys.CMD_CANCEL_SLEEP_TIMER -> handleCancelSleepTimer()
-                else -> Futures.immediateFuture(SessionResult.RESULT_SUCCESS)
-            }
-        }
+            mediaItems: MutableList<MediaItem>
+        ): ListenableFuture<List<MediaItem>> {
+            val updatedMediaItems: List<MediaItem> =
+                mediaItems.map { mediaItem ->
+                    CollectionHelper.getItem(this@PlayerService, collection, mediaItem.mediaId)
+//                    if (mediaItem.requestMetadata.searchQuery != null)
+//                        getMediaItemFromSearchQuery(mediaItem.requestMetadata.searchQuery!!)
+//                    else MediaItemTree.getItem(mediaItem.mediaId) ?: mediaItem
+                }
 
-        private fun handleStartSleepTimer(args: Bundle): ListenableFuture<SessionResult> {
-            val selectedTimeMillis = args.getLong(Keys.SLEEP_TIMER_DURATION)
-            startSleepTimer(selectedTimeMillis)
-            return Futures.immediateFuture(SessionResult.RESULT_SUCCESS)
-        }
+            return Futures.immediateFuture(updatedMediaItems)
 
-        private fun handleCancelSleepTimer(): ListenableFuture<SessionResult> {
-            cancelSleepTimer()
-            return Futures.immediateFuture(SessionResult.RESULT_SUCCESS)
+//            val updatedMediaItems = mediaItems.map { mediaItem ->
+//                mediaItem.buildUpon().apply {
+//                    setUri(mediaItem.requestMetadata.mediaUri)
+//                }.build()
+//            }
+//            return Futures.immediateFuture(updatedMediaItems)
         }
-    }
 
         override fun onConnect(
             session: MediaSession,
@@ -353,17 +363,13 @@ class PlayerService : MediaLibraryService() {
         }
 
         override fun onGetItem(
-        session: MediaLibrarySession,
-        browser: MediaSession.ControllerInfo,
-        mediaId: String
-    ): ListenableFuture<LibraryResult<MediaItem>> {
-        val item = CollectionHelper.getItem(this@PlayerService, collection, mediaId)
-        return if (item != null) {
-            Futures.immediateFuture(LibraryResult.ofItem(item, null))
-        } else {
-            Futures.immediateFuture(LibraryResult.ofError(LibraryResult.ERROR_ITEM_NOT_FOUND))
+            session: MediaLibrarySession,
+            browser: MediaSession.ControllerInfo,
+            mediaId: String
+        ): ListenableFuture<LibraryResult<MediaItem>> {
+            val item: MediaItem = CollectionHelper.getItem(this@PlayerService, collection, mediaId)
+            return Futures.immediateFuture(LibraryResult.ofItem(item, /* params = */ null))
         }
-    }
 
         override fun onCustomCommand(
             session: MediaSession,
@@ -601,9 +607,10 @@ class PlayerService : MediaLibraryService() {
         }
 
         override fun onPlayerError(error: PlaybackException) {
-        super.onPlayerError(error)
-        Toast.makeText(context, "Playback error: ${error.message}", Toast.LENGTH_SHORT).show()
-    }
+            super.onPlayerError(error)
+            Timber.tag(TAG).d("PlayerError occurred: ${error.errorCodeName}")
+            // todo: test if playback needs to be restarted
+        }
 
         override fun onMetadata(metadata: Metadata) {
             super.onMetadata(metadata)

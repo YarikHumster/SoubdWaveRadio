@@ -2,14 +2,14 @@ package com.yaros.RadioUrl
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 
 object PermissionHelper {
@@ -55,7 +55,7 @@ object PermissionHelper {
     }
 
     @SuppressLint("BatteryLife")
-    private fun isIgnoringBatteryOptimizations(context: Context): Boolean {
+    fun isIgnoringBatteryOptimizations(context: Context): Boolean {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         val packageName = context.packageName
         return powerManager.isIgnoringBatteryOptimizations(packageName)

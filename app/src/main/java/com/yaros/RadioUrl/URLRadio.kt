@@ -8,6 +8,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.yaros.RadioUrl.helpers.AdManager
 import com.yaros.RadioUrl.helpers.AppThemeHelper
+import com.yaros.RadioUrl.helpers.NetworkHelper
 import com.yaros.RadioUrl.helpers.PreferencesHelper
 import com.yaros.RadioUrl.helpers.PreferencesHelper.initPreferences
 import timber.log.Timber
@@ -25,17 +26,7 @@ class URLRadio : Application() {
         adManager = AdManager(this)
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
         ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleObserver)
-
-        // Check if the event has been sent already
-        if (!PreferencesHelper.isStoreInstallEventSent()) {
-            val installerPackage = packageManager.getInstallerPackageName(packageName)
-            val storeName = getStoreName(installerPackage)
-            firebaseAnalytics?.logEvent("app_install_source") {
-                param("store_name", storeName)
-            }
-            // Set the flag to true
-            PreferencesHelper.setStoreInstallEventSent(true)
-        }
+        NetworkHelper.initialize(this)
     }
 
      private fun getStoreName(installerPackage: String?): String {

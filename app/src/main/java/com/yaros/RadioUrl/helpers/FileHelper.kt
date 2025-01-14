@@ -237,39 +237,21 @@ object FileHelper {
     }
 
 
-    suspend fun saveCollectionSuspended(context: Context, collection: Collection, lastSave: Date) {
-    withContext(Dispatchers.IO) {
-        val gson = getCustomGson()
-        val json = gson.toJson(collection)
-        val file = context.filesDir.resolve(Keys.COLLECTION_FILE)
-        try {
-            file.writeText(json)
-            PreferencesHelper.saveCollectionModificationDate(lastSave)
-            PreferencesHelper.saveCollectionSize(collection.stations.size)
-        } catch (e: IOException) {
-            Timber.tag(TAG).e("Ошибка при сохранении коллекции: ${e.message}")
+    suspend fun saveCollectionSuspended(
+        context: Context,
+        collection: Collection,
+        lastUpdate: Date
+    ) {
+        return suspendCoroutine { cont ->
+            cont.resume(saveCollection(context, collection, lastUpdate))
         }
     }
-}
 
 
-    suspend fun readCollectionSuspended(context: Context): Collection {
-    return withContext(Dispatchers.IO) {
-        val gson = getCustomGson()
-        val file = context.filesDir.resolve(Keys.COLLECTION_FILE)
-        if (file.exists()) {
-            try {
-                val json = file.readText()
-                return@withContext gson.fromJson(json, Collection::class.java)
-            } catch (e: IOException) {
-                Timber.tag(TAG).e("Ошибка при чтении коллекции: ${e.message}")
-            } catch (e: JsonParseException) {
-                Timber.tag(TAG).e("Ошибка парсинга JSON: ${e.message}")
-            }
+    suspend fun readCollectionSuspended(context: Context): Collection =
+        withContext(IO) {
+            readCollection(context)
         }
-        Collection()
-    }
-}
 
 
     suspend fun saveCopyOfFileSuspended(
@@ -351,11 +333,11 @@ object FileHelper {
 
 
     private fun getCustomGson(): Gson {
-    return GsonBuilder()
-        .setDateFormat("yyyy-MM-dd HH:mm:ss")
-        .excludeFieldsWithoutExposeAnnotation()
-        .create()
-}
+        val gsonBuilder = GsonBuilder()
+        gsonBuilder.setDateFormat("M/d/yy hh:mm a")
+        gsonBuilder.excludeFieldsWithoutExposeAnnotation()
+        return gsonBuilder.create()
+    }
 
 
     fun createNomediaFile(folder: File?) {

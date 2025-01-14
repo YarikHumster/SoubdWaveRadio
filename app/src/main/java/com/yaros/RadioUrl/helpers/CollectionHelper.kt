@@ -583,29 +583,11 @@ object CollectionHelper {
         }.build()
         val mediaMetadata = MediaMetadata.Builder().apply {
             setArtist(station.name)
-            Timber.tag(TAG).d("Building MediaItem for station: ${station.name}, image: ${station.image}")
             if (station.image.isNotEmpty() && station.image.startsWith("file://")) {
-                try {
-                    val imageFile = station.image.toUri().toFile()
-                    if (imageFile.exists() && imageFile.canRead()) {
-                        setArtworkData(
-                            imageFile.readBytes(),
-                            MediaMetadata.PICTURE_TYPE_FRONT_COVER
-                        )
-                    } else {
-                        Timber.tag(TAG).e("Station image file does not exist or is not readable: ${station.image}")
-                        setArtworkData(
-                            ImageHelper.getStationImageAsByteArray(context),
-                            MediaMetadata.PICTURE_TYPE_FRONT_COVER
-                        )
-                    }
-                } catch (e: Exception) {
-                    Timber.tag(TAG).e(e, "Error reading station image file: ${station.image}")
-                    setArtworkData(
-                        ImageHelper.getStationImageAsByteArray(context),
-                        MediaMetadata.PICTURE_TYPE_FRONT_COVER
-                    )
-                }
+                setArtworkData(
+                    station.image.toUri().toFile().readBytes(),
+                    MediaMetadata.PICTURE_TYPE_FRONT_COVER
+                )
             } else {
                 setArtworkData(
                     ImageHelper.getStationImageAsByteArray(context),

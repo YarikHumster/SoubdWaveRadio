@@ -445,7 +445,7 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
 
     /* Updates collection */
     private fun updateCollection() {
-        if (NetworkHelper.isConnectedToNetwork(activity as Context)) {
+        if (NetworkHelper.isConnectedToNetwork()) {
             Snackbar.make(
                 requireView(),
                 R.string.toastmessage_updating_collection,
@@ -466,7 +466,7 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
 
     /* Updates station images */
     private fun updateStationImages() {
-        if (NetworkHelper.isConnectedToNetwork(activity as Context)) {
+        if (NetworkHelper.isConnectedToNetwork()) {
             Snackbar.make(
                 requireView(),
                 R.string.toastmessage_updating_station_images,

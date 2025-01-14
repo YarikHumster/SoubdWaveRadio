@@ -1,3 +1,5 @@
+package com.yaros.RadioUrl.helpers
+
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
@@ -5,7 +7,9 @@ import com.yaros.RadioUrl.Keys
 import okhttp3.*
 import timber.log.Timber
 import java.io.IOException
+import java.net.ConnectException
 import java.net.InetAddress
+import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
@@ -18,6 +22,7 @@ import java.util.*
 object NetworkHelper {
 
     private val TAG: String = NetworkHelper::class.java.simpleName
+    private lateinit var appContext: Context
 
     val client: OkHttpClient by lazy {
         val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
@@ -39,9 +44,13 @@ object NetworkHelper {
 
     data class ContentType(var type: String = "", var charset: String = "")
 
-    fun isConnectedToNetwork(context: Context): Boolean {
+    fun initialize(context: Context) {
+        appContext = context.applicationContext
+    }
+
+    fun isConnectedToNetwork(): Boolean {
         return try {
-            val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val connMgr = appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val activeNetwork: Network? = connMgr.activeNetwork
             activeNetwork != null
         } catch (e: Exception) {
@@ -50,10 +59,11 @@ object NetworkHelper {
         }
     }
 
-    suspend fun detectContentType(context: Context, urlString: String): ContentType {
-        if (!isConnectedToNetwork(context)) {
+    suspend fun detectContentType(urlString: String): ContentType {
+        if (!isConnectedToNetwork()) {
             throw IOException("No internet connection")
         }
+
         return suspendCoroutine { cont ->
             val request = Request.Builder().url(urlString).build()
             client.newCall(request).enqueue(object : Callback {
@@ -97,8 +107,8 @@ object NetworkHelper {
         }
     }
 
-    suspend fun downloadPlaylist(context: Context, playlistUrlString: String): List<String> {
-        if (!isConnectedToNetwork(context)) {
+    suspend fun downloadPlaylist(playlistUrlString: String): List<String> {
+        if (!isConnectedToNetwork()) {
             throw IOException("No internet connection")
         }
         return suspendCoroutine { cont ->
@@ -127,8 +137,8 @@ object NetworkHelper {
         }
     }
 
-    suspend fun detectContentTypeSuspended(context: Context, urlString: String): ContentType {
-        if (!isConnectedToNetwork(context)) {
+    suspend fun detectContentTypeSuspended(urlString: String): ContentType {
+        if (!isConnectedToNetwork()) {
             throw IOException("No internet connection")
         }
         return suspendCoroutine { cont ->
