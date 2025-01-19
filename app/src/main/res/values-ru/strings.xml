@@ -96,8 +96,10 @@
     <string name="pref_update_station_images_title">Обновить изображения станций</string>
     <!-- Sample Text -->
     <!-- App Shortcuts -->
-    <string name="pref_tg_title">Телеграм</string>
-    <string name="pref_tg_summary">Канал SoundWave</string>
+    <string name="pref_tg_title">Канал SoundWave</string>
+    <string name="pref_tg_summary_bot">Ваш помощник и прямой способ связаться с разработчиком</string>
+    <string name="pref_pay_summary">Вы можете добровольно пожертвовать монетку на развитие проекта</string>
+    <string name="pref_tg_summary">Последние новости о проекте и многое другое</string>
     <string name="notification">Разрешение на получение уведомлений</string>
     <string name="notification_info">Для полноценного функционирования приложения, пожалуйста, включите уведомления в настройках.</string>
     <string name="setting">Настройки</string>
@@ -145,4 +147,6 @@
     <string name="battery_no_message">Без этого разрешения некоторые функции могут работать некорректно. Хотите открыть настройки оптимизации батареи?</string>
     <string name="battery_reload">Вы можете изменить это позже в настройках приложения</string>
     <string name="battari_info">Для корректной работы приложения в фоновом режиме необходимо разрешение на игнорирование оптимизации батареи. Разрешить?</string>
+    <string name="pref_tg_title_bot">Бот SoundWave</string>
+    <string name="pref_pay_title">Поддержка проекта чеканной монетой</string>
 </resources>

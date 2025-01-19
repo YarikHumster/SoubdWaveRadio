@@ -110,8 +110,12 @@
     <string name="pref_theme_selection_title">App Theme</string>
     <string name="pref_update_station_images_summary">Download latest version of all station images.</string>
     <string name="pref_update_station_images_title">Update Station Images</string>
-    <string name="pref_tg_title">Telegram</string>
-    <string name="pref_tg_summary">Channel SoundWave</string>
+    <string name="pref_tg_title">Channel SoundWave</string>
+    <string name="pref_tg_title_bot">Bot SoundWave</string>
+    <string name="pref_tg_summary_bot">Your assistant and a direct way to contact the developer</string>
+    <string name="pref_pay_title">Project support with a minted coin</string>
+    <string name="pref_pay_summary">You can voluntarily donate a coin to the development of the project.</string>
+    <string name="pref_tg_summary">The latest news on the project and more</string>
     <string name="notification">Permission for notifications</string>
     <string name="notification_info">For the full functioning of the application, please enable notifications in the settings.</string>
     <string name="setting">Settings</string>

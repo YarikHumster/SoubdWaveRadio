@@ -47,7 +47,6 @@ import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.yaros.RadioUrl.core.Collection
 import com.yaros.RadioUrl.helpers.AudioHelper
-import com.yaros.RadioUrl.helpers.CacheManager
 import com.yaros.RadioUrl.helpers.CollectionHelper
 import com.yaros.RadioUrl.helpers.FileHelper
 import com.yaros.RadioUrl.helpers.NetworkHelper
@@ -82,8 +81,11 @@ class PlayerService : MediaLibraryService() {
     override fun onCreate() {
         super.onCreate()
         Timber.tag(TAG).d("onCreatePlayerService: Start")  // Логирование для отслеживания
+
+        // Создание уведомления и запуск сервиса в переднем режиме
         val notification = createNotification(notificationChannelId)
         startForeground(notificationId, notification)
+
         collection = FileHelper.readCollection(this)
         LocalBroadcastManager.getInstance(application).registerReceiver(
             collectionChangedReceiver,
@@ -95,6 +97,9 @@ class PlayerService : MediaLibraryService() {
         val notificationProvider = CustomNotificationProvider()
         setMediaNotificationProvider(notificationProvider)
         metadataHistory = PreferencesHelper.loadMetadataHistory()
+
+        val prefs = getSharedPreferences("PermissionPrefs", MODE_PRIVATE)
+        prefs.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
     }
 
     private fun createNotification(channelId: String): Notification {
@@ -105,7 +110,7 @@ class PlayerService : MediaLibraryService() {
                 "PlayerService",
                 NotificationManager.IMPORTANCE_LOW
             )
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(notificationChannel)
         }
 
@@ -122,7 +127,9 @@ class PlayerService : MediaLibraryService() {
         player.removeListener(playerListener)
         player.release()
         mediaLibrarySession.release()
-        CacheManager.onDestroy()
+        LocalBroadcastManager.getInstance(application).unregisterReceiver(collectionChangedReceiver)
+        val prefs = getSharedPreferences("PermissionPrefs", MODE_PRIVATE)
+        prefs.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
         super.onDestroy()
     }
 
@@ -159,7 +166,7 @@ class PlayerService : MediaLibraryService() {
         // Обертывание проигрывателя
         player = object : ForwardingPlayer(exoPlayer) {
             override fun getAvailableCommands(): Player.Commands {
-                return super.getAvailableCommands().buildUpon()
+                return super.availableCommands.buildUpon()
                     .add(COMMAND_SEEK_TO_NEXT)
                     .add(COMMAND_SEEK_TO_PREVIOUS)
                     .build()

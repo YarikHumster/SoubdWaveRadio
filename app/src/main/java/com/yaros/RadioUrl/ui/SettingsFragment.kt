@@ -15,7 +15,6 @@ import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.fragment.findNavController
@@ -29,7 +28,6 @@ import com.yaros.RadioUrl.core.dialogs.YesNoDialog
 import com.yaros.RadioUrl.helpers.AppThemeHelper
 import com.yaros.RadioUrl.helpers.AppThemeHelper.getColor
 import com.yaros.RadioUrl.helpers.BackupHelper
-import com.yaros.RadioUrl.helpers.CacheManager
 import com.yaros.RadioUrl.helpers.FileHelper
 import com.yaros.RadioUrl.helpers.NetworkHelper
 import com.yaros.RadioUrl.helpers.PreferencesHelper
@@ -40,16 +38,12 @@ import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 
-
 class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListener {
-
 
     private val TAG: String = SettingsFragment::class.java.simpleName
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             (activity as AppCompatActivity).window.navigationBarColor = getColor(requireContext(), android.R.attr.colorBackground)
@@ -111,17 +105,6 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
             )
             return@setOnPreferenceClickListener true
         }
-
-//        // set up "Update Stations" preference
-//        val preferenceUpdateCollection: Preference = Preference(activity as Context)
-//        preferenceUpdateCollection.title = getString(R.string.pref_update_collection_title)
-//        preferenceUpdateCollection.setIcon(R.drawable.ic_refresh_24dp)
-//        preferenceUpdateCollection.summary = getString(R.string.pref_update_collection_summary)
-//        preferenceUpdateCollection.setOnPreferenceClickListener {
-//            // show dialog
-//            YesNoDialog(this).show(context = activity as Context, type = Keys.DIALOG_UPDATE_COLLECTION, message = R.string.dialog_yes_no_message_update_collection, yesButton = R.string.dialog_yes_no_positive_button_update_collection)
-//            return@setOnPreferenceClickListener true
-//        }
 
         val preferenceM3uExport = Preference(activity as Context)
         preferenceM3uExport.title = getString(R.string.pref_m3u_export_title)
@@ -205,22 +188,22 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
             return@setOnPreferenceChangeListener true
         }
 
-        val preferenceCacheManager = SwitchPreferenceCompat(activity as Context)
-        preferenceCacheManager.title = getString(R.string.pref_cache_title)
-        preferenceCacheManager.setIcon(R.drawable.ic_cache_24dp)
-        preferenceCacheManager.key = CacheManager.PREF_CACHE_STATUS
-        preferenceCacheManager.summaryOn = getString(R.string.pref_cache_enable)
-        preferenceCacheManager.summaryOff = getString(R.string.pref_cache_disable)
-        preferenceCacheManager.isChecked = CacheManager.isCachingEnabled(requireContext())
-        preferenceCacheManager.setOnPreferenceChangeListener { _, newValue ->
-            val isEnabled = newValue as Boolean
-            if (isEnabled) {
-                CacheManager.enableCaching(requireContext())
-            } else {
-                CacheManager.disableCaching(requireContext())
-            }
-            true
-        }
+//        val preferenceCacheManager = SwitchPreferenceCompat(activity as Context)
+//        preferenceCacheManager.title = getString(R.string.pref_cache_title)
+//        preferenceCacheManager.setIcon(R.drawable.ic_cache_24dp)
+//        preferenceCacheManager.key = CacheManager.PREF_CACHE_STATUS
+//        preferenceCacheManager.summaryOn = getString(R.string.pref_cache_enable)
+//        preferenceCacheManager.summaryOff = getString(R.string.pref_cache_disable)
+//        preferenceCacheManager.isChecked = CacheManager.isCachingEnabled(requireContext())
+//        preferenceCacheManager.setOnPreferenceChangeListener { _, newValue ->
+//            val isEnabled = newValue as Boolean
+//            if (isEnabled) {
+//                CacheManager.enableCaching(requireContext())
+//            } else {
+//                CacheManager.disableCaching(requireContext())
+//            }
+//            true
+//        }
 
         // set up "App Version" preference
         val preferenceAppVersion = Preference(context)
@@ -240,37 +223,6 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
             }
             return@setOnPreferenceClickListener true
         }
-
-        // set up "VK" preference
-        val preferenceVK = Preference(context)
-        preferenceVK.title = getString(R.string.pref_vk_title)
-        preferenceVK.setIcon(R.drawable.ic_vk_24dp)
-        preferenceVK.summary = getString(R.string.pref_vk_summary)
-        preferenceVK.setOnPreferenceClickListener {
-            // open web browser
-            val intent = Intent().apply {
-                action = Intent.ACTION_VIEW
-                data = "https://vk.com/soulwaveonline".toUri()
-            }
-            startActivity(intent)
-            return@setOnPreferenceClickListener true
-        }
-
-        // set up Telegram preference
-        val preferenceTg = Preference(context)
-        preferenceTg.title = getString(R.string.pref_tg_title)
-        preferenceTg.setIcon(R.drawable.ic_tg_24dp)
-        preferenceTg.summary = getString(R.string.pref_tg_summary)
-        preferenceTg.setOnPreferenceClickListener {
-            // open web browser
-            val intent = Intent().apply {
-                action = Intent.ACTION_VIEW
-                data = "https://t.me/soundwaveradio".toUri()
-            }
-            startActivity(intent)
-            return@setOnPreferenceClickListener true
-        }
-
 
         // set preference categories
         val preferenceCategoryGeneral = PreferenceCategory(activity as Context)
@@ -295,12 +247,6 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         preferenceCategoryAdvanced.contains(preferenceEnableEditingGeneral)
         preferenceCategoryAdvanced.contains(preferenceEnableEditingStreamUri)
 
-        val preferenceCategoryLinks = PreferenceCategory(context)
-        preferenceCategoryLinks.title = getString(R.string.pref_links_title)
-        preferenceCategoryLinks.contains(preferenceAppVersion)
-        preferenceCategoryLinks.contains(preferenceVK)
-        preferenceCategoryLinks.contains(preferenceTg)
-
 
         // setup preference screen
         screen.addPreference(preferenceAppVersion)
@@ -308,7 +254,6 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         screen.addPreference(preferenceThemeSelection)
         screen.addPreference(preferenceCategoryMaintenance)
         screen.addPreference(preferenceUpdateStationImages)
-//        screen.addPreference(preferenceUpdateCollection)
         screen.addPreference(preferenceCategoryImportExport)
         screen.addPreference(preferenceM3uExport)
         screen.addPreference(preferencePlsExport)
@@ -316,12 +261,8 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         screen.addPreference(preferenceRestoreCollection)
         screen.addPreference(preferenceCategoryAdvanced)
         screen.addPreference(preferenceBufferSize)
-        screen.addPreference(preferenceCacheManager)
         screen.addPreference(preferenceEnableEditingGeneral)
         screen.addPreference(preferenceEnableEditingStreamUri)
-        screen.addPreference(preferenceCategoryLinks)
-        screen.addPreference(preferenceVK)
-        screen.addPreference(preferenceTg)
         preferenceScreen = screen
     }
 

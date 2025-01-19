@@ -533,9 +533,9 @@ class PlayerFragment : Fragment(),
 
     private fun handleNavigationArguments() {
         val updateCollection: Boolean =
-            arguments?.getBoolean(Keys.ARG_UPDATE_COLLECTION, false) ?: false
+            arguments?.getBoolean(Keys.ARG_UPDATE_COLLECTION, false) == true
         val updateStationImages: Boolean =
-            arguments?.getBoolean(Keys.ARG_UPDATE_IMAGES, false) ?: false
+            arguments?.getBoolean(Keys.ARG_UPDATE_IMAGES, false) == true
         val restoreCollectionFileString: String? = arguments?.getString(Keys.ARG_RESTORE_COLLECTION)
 
         if (updateCollection) {

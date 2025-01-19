@@ -88,8 +88,10 @@
     <string name="pref_theme_selection_title">Тема програми</string>
     <string name="pref_update_station_images_summary">Завантажити останню версію всіх зображень станцій.</string>
     <string name="pref_update_station_images_title">Оновити зображення станцій</string>
-    <string name="pref_tg_title">Telegram</string>
-    <string name="pref_tg_summary">Канал SoundWave</string>
+    <string name="pref_tg_title">Канал SoundWave</string>
+    <string name="pref_tg_summary_bot">Ваш помічник і прямий спосіб зв\'язатися з розробником</string>
+    <string name="pref_pay_summary">Ви можете добровільно пожертвувати монетку на розвиток проекту</string>
+    <string name="pref_tg_summary">Останні новини Про проект та багато іншого</string>
     <string name="notification">Дозвіл на отримання повідомлень</string>
     <string name="notification_info">Для повноцінного функціонування програми, будь ласка, включіть повідомлення в Налаштуваннях.</string>
     <string name="setting">Настройка</string>
@@ -131,4 +133,6 @@
     <string name="battery_no_message">Без цього дозволу деякі функції можуть працювати некоректно. Хочете відкрити налаштування оптимізації акумулятора?</string>
     <string name="battery_reload">Ви можете змінити це пізніше в налаштуваннях програми</string>
     <string name="battari_info">Для коректної роботи програми у фоновому режимі необхідний дозвіл на ігнорування оптимізації батареї. Дозволити?</string>
+    <string name="pref_tg_title_bot">Бот SoundWave</string>
+    <string name="pref_pay_title">Підтримка проекту карбованою монетою</string>
 </resources>

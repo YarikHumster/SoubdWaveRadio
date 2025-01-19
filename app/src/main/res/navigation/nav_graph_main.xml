@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_navigation_home_to_navigation_catalog"
             app:destination="@id/navigation_catalog" />
+        <action
+            android:id="@+id/action_navigation_home_to_socialFragment"
+            app:destination="@id/navigation_social" />
     </fragment>
 
     <fragment
@@ -35,6 +38,9 @@
         <action
             android:id="@+id/action_navigation_menu_to_favoriteFragment"
             app:destination="@id/favoriteFragment" />
+        <action
+            android:id="@+id/action_navigation_menu_to_socialFragment"
+            app:destination="@id/navigation_social" />
     </fragment>
 
     <fragment
@@ -47,6 +53,9 @@
         <action
             android:id="@+id/action_navigation_catalog_to_navigation_menu"
             app:destination="@id/navigation_menu" />
+        <action
+            android:id="@+id/action_navigation_catalog_to_socialFragment"
+            app:destination="@id/navigation_social" />
     </fragment>
 
     <fragment
@@ -58,5 +67,20 @@
         android:id="@+id/favoriteFragment"
         android:name="com.yaros.RadioUrl.ui.FavoriteSong.FavoriteFragment"
         android:label="FavoriteFragment" />
+    <fragment
+        android:id="@+id/navigation_social"
+        android:name="com.yaros.RadioUrl.ui.SocialFragment"
+        android:label="SocialFragment"
+        tools:layout="@layout/activity_social">
+        <action
+            android:id="@+id/action_socialFragment_to_navigation_menu"
+            app:destination="@id/navigation_menu" />
+        <action
+            android:id="@+id/action_socialFragment_to_navigation_home"
+            app:destination="@id/navigation_home" />
+        <action
+            android:id="@+id/action_socialFragment_to_navigation_catalog"
+            app:destination="@id/navigation_catalog" />
+    </fragment>
 </navigation>
 

@@ -376,7 +376,7 @@ class CollectionAdapter(
         if (payloads.isEmpty()) {
             onBindViewHolder(holder, position)
         } else if (holder is StationViewHolder) {
-            collection.stations[holder.getAdapterPosition()]
+            collection.stations[holder.adapterPosition]
             for (data in payloads) {
                 when (data as Int) {
                     Keys.HOLDER_UPDATE_COVER -> {

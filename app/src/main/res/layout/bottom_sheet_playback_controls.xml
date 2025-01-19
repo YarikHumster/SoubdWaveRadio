@@ -236,6 +236,7 @@
         android:layout_height="33dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
+        android:gravity="center"
         android:lines="2"
         android:singleLine="false"
         android:textAppearance="@style/TextAppearance.Material3.LabelMedium"

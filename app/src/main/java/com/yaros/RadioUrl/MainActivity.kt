@@ -7,8 +7,6 @@ import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -56,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         reviewManager = ReviewManager(this)
         reviewManager.initialize()
 
-       PermissionHelper.checkAllPermissions(this)
+        PermissionHelper.checkAllPermissions(this)
 
         FileHelper.createNomediaFile(getExternalFilesDir(null))
         setSupportActionBar(findViewById(R.id.main_toolbar))
@@ -65,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         val navView: BottomNavigationView = findViewById(R.id.bottomNavigationView)
 
         appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.navigation_home,R.id.navigation_catalog, R.id.navigation_menu )
+            setOf(R.id.navigation_home,R.id.navigation_catalog, R.id.navigation_menu, R.id.navigation_social)
         )
 
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -123,32 +121,12 @@ class MainActivity : AppCompatActivity() {
         adManager.destroyBannerAd()
     }
 
-    private val sharedPreferenceChangeListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+    private val sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             when (key) {
                 Keys.PREF_THEME_SELECTION -> {
                     AppThemeHelper.setTheme(PreferencesHelper.loadThemeSelection())
                 }
             }
         }
-        
-        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PermissionHelper.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) {
-            if (PermissionHelper.isIgnoringBatteryOptimizations(this)) {
-                Toast.makeText(this, R.string.battary_no_function, Toast.LENGTH_SHORT).show()
-            } else {
-                AlertDialog.Builder(this)
-                    .setTitle(R.string.battary_no)
-                    .setMessage(R.string.battery_no_message)
-                    .setPositiveButton(R.string.dialog_yes_no_positive_button_default) { _, _ ->
-                        PermissionHelper.openBatteryOptimizationSettings(this)
-                    }
-                    .setNegativeButton(R.string.dialog_generic_button_cancel) { _, _ ->
-                        Toast.makeText(this, R.string.battery_reload, Toast.LENGTH_LONG).show()
-                    }
-                    .show()
-            }
-        }
-    }
+
 }

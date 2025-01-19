@@ -37,7 +37,7 @@ class FMessagingService : FirebaseMessagingService() {
             val channelId = "2038"
             val channelName = "SoundWave"
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
                 val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
                     description = R.string.descr_notification.toString()
                     enableLights(true)
@@ -58,7 +58,7 @@ class FMessagingService : FirebaseMessagingService() {
                 .setLights(Color.BLUE, 1000, 300) // Установка цветового мигания
 
             // Отправка уведомления
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.notify(0, notificationBuilder.build())
 
             Timber.tag(TAG).d("Сообщение получено: $body + $title")
