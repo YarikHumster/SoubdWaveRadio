@@ -34,48 +34,48 @@ class SocialFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val buttonsocial1 = view.findViewById<LinearLayout>(R.id.button_social1)
-        val socialImage = view.findViewById<ImageView>(R.id.button_image_social1)
-        val buttonSocial = view.findViewById<TextView>(R.id.button_title_social1)
-        val buttonDescriptionSocial = view.findViewById<TextView>(R.id.button_description_social1)
+        val tgChannelClickble = view.findViewById<LinearLayout>(R.id.tgChannelClickble)
+        val tgChannelImage = view.findViewById<ImageView>(R.id.tgChannelImage)
+        val tgChannelTitle = view.findViewById<TextView>(R.id.tgChannelTitle)
+        val tgChannelSummon = view.findViewById<TextView>(R.id.tgChannelSummon)
 
-        val buttonsocial2 = view.findViewById<LinearLayout>(R.id.buttonsocial2)
-        val buttonSocial2 = view.findViewById<ImageView>(R.id.button_imagesocial2)
-        val socialImage2 = view.findViewById<TextView>(R.id.button_titlesocial2)
-        val buttonDescriptionSocial2 = view.findViewById<TextView>(R.id.button_descriptionsocial2)
+        val tgBotClickble = view.findViewById<LinearLayout>(R.id.tgBotClickble)
+        val tgBotImage = view.findViewById<ImageView>(R.id.tgBotImage)
+        val tgBotTitle = view.findViewById<TextView>(R.id.tgBotTitle)
+        val tgBotSummon = view.findViewById<TextView>(R.id.tgBotSummon)
 
-        val buttonsocialpay = view.findViewById<LinearLayout>(R.id.buttonsocial3)
-        val buttonsocial3 = view.findViewById<ImageView>(R.id.button_imagesocial3)
-        val socialImage3 = view.findViewById<TextView>(R.id.button_titlesocial3)
-        val buttonDescriotionSocial3 = view.findViewById<TextView>(R.id.button_descriptionsocial3)
+        val payClickable = view.findViewById<LinearLayout>(R.id.payClickable)
+        val payImage = view.findViewById<ImageView>(R.id.payImage)
+        val payTitle = view.findViewById<TextView>(R.id.payTitle)
+        val paySummon = view.findViewById<TextView>(R.id.paySummon)
 
         // Set images and titles
-        socialImage.setImageResource(R.drawable.ic_tg)
-        buttonSocial.text = getString(R.string.pref_tg_title)
-        buttonDescriptionSocial.text = getString(R.string.pref_tg_summary)
+        tgChannelImage.setImageResource(R.drawable.ic_tg)
+        tgChannelTitle.text = getString(R.string.pref_tg_title)
+        tgChannelSummon.text = getString(R.string.pref_tg_summary)
 
-        buttonSocial2.setImageResource(R.drawable.ic_tg)
-        socialImage2.text = getString(R.string.pref_tg_title_bot)
-        buttonDescriptionSocial2.text = getString(R.string.pref_tg_summary_bot)
+        tgBotImage.setImageResource(R.drawable.ic_tg)
+        tgBotTitle.text = getString(R.string.pref_tg_title_bot)
+        tgBotSummon.text = getString(R.string.pref_tg_summary_bot)
 
-        buttonsocial3.setImageResource(R.drawable.ic_coffee)
-        socialImage3.text = getString(R.string.pref_pay_title)
-        buttonDescriotionSocial3.text = getString(R.string.pref_pay_summary)
+        payImage.setImageResource(R.drawable.ic_coffee)
+        payTitle.text = getString(R.string.pref_pay_title)
+        paySummon.text = getString(R.string.pref_pay_summary)
 
-        socialImage.contentDescription = getString(R.string.pref_tg_title)
-        socialImage2.contentDescription = getString(R.string.pref_tg_title_bot)
-        buttonsocial3.contentDescription = getString(R.string.pref_pay_title)
+        tgChannelImage.contentDescription = getString(R.string.pref_tg_title)
+        tgBotImage.contentDescription = getString(R.string.pref_tg_title_bot)
+        payImage.contentDescription = getString(R.string.pref_pay_title)
 
         // Set click listeners
-        buttonsocial1.setOnClickListener {
+        tgChannelClickble.setOnClickListener {
             openLink("https://www.facebook.com")
         }
 
-        buttonsocial2.setOnClickListener {
+        tgBotClickble.setOnClickListener {
            openLink("https://www.twitter.com")
        }
 
-        buttonsocialpay.setOnClickListener {
+        payClickable.setOnClickListener {
             openLink("https://www.tbank.ru/cf/8fwehAv657s")
         }
 
