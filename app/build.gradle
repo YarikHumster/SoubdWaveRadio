@@ -83,7 +83,8 @@ dependencies {
 
     // AndroidX Libraries
     implementation "androidx.core:core-ktx:1.15.0"
-    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation "androidx.cardview:cardview:1.0.0"
+    implementation "androidx.preference:preference:1.2.0"
     implementation "androidx.appcompat:appcompat:1.7.0"
     implementation "androidx.activity:activity-ktx:1.10.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7"
