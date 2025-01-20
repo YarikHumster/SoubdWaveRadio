@@ -7,7 +7,7 @@
 
     <!-- First Button -->
     <LinearLayout
-        android:id="@+id/button_social1"
+        android:id="@+id/tgChannelClickble"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/div_gallery_item_border"
@@ -17,7 +17,7 @@
         android:padding="16dp">
 
         <ImageView
-            android:id="@+id/button_image_social1"
+            android:id="@+id/tgChannelImage"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center_vertical"
@@ -32,7 +32,7 @@
             tools:ignore="RtlSymmetry">
 
             <TextView
-                android:id="@+id/button_title_social1"
+                android:id="@+id/tgChannelTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Button Title 1"
@@ -40,7 +40,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/button_description_social1"
+                android:id="@+id/tgChannelSummon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Button Description 1"
@@ -52,7 +52,7 @@
 
     <!-- Second Button -->
     <LinearLayout
-        android:id="@+id/buttonsocial2"
+        android:id="@+id/tgBotClickble"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -63,7 +63,7 @@
         android:padding="16dp">
 
         <ImageView
-            android:id="@+id/button_imagesocial2"
+            android:id="@+id/tgBotImage"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center_vertical"
@@ -78,7 +78,7 @@
             tools:ignore="RtlSymmetry">
 
             <TextView
-                android:id="@+id/button_titlesocial2"
+                android:id="@+id/tgBotTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Button Title 2"
@@ -86,7 +86,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/button_descriptionsocial2"
+                android:id="@+id/tgBotSummon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Button Description 2"
@@ -98,7 +98,7 @@
 
     <!-- Third Button -->
     <LinearLayout
-        android:id="@+id/buttonsocial3"
+        android:id="@+id/payClickable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -109,7 +109,7 @@
         android:padding="16dp">
 
         <ImageView
-            android:id="@+id/button_imagesocial3"
+            android:id="@+id/payImage"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center_vertical"
@@ -124,7 +124,7 @@
             tools:ignore="RtlSymmetry">
 
             <TextView
-                android:id="@+id/button_titlesocial3"
+                android:id="@+id/payTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Button Title 3"
@@ -132,7 +132,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/button_descriptionsocial3"
+                android:id="@+id/paySummon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Button Description 3"
