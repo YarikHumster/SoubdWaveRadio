@@ -207,8 +207,25 @@ class PlayerService : MediaLibraryService() {
             DefaultLoadControl.DEFAULT_MAX_BUFFER_MS * factor,
             DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS * factor,
             DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS * factor
-        )
+            )
         return builder.build()
+    }
+
+    private fun adjustBufferingFactor(networkSpeed: Int): Int {
+        return when {
+            networkSpeed < 100 -> 2 // Low speed
+            networkSpeed < 500 -> 1 // Medium speed
+            else -> 0 // High speed
+        }
+    }
+
+    private fun updateBufferingSettings() {
+        val networkSpeed = NetworkHelper.getNetworkSpeed(this)
+        val newFactor = adjustBufferingFactor(networkSpeed)
+        if (newFactor != bufferSizeMultiplier) {
+            bufferSizeMultiplier = newFactor
+            initializePlayer()
+        }
     }
 
     private fun startSleepTimer(selectedTimeMillis: Long) {
@@ -616,7 +633,11 @@ class PlayerService : MediaLibraryService() {
         override fun onPlayerError(error: PlaybackException) {
             super.onPlayerError(error)
             Timber.tag(TAG).d("PlayerError occurred: ${error.errorCodeName}")
-            // todo: test if playback needs to be restarted
+            Toast.makeText(
+            applicationContext,
+            "Error occurred: ${error.errorCodeName}",
+            Toast.LENGTH_LONG
+            ).show()
         }
 
         override fun onMetadata(metadata: Metadata) {
@@ -627,22 +648,23 @@ class PlayerService : MediaLibraryService() {
     }
 
     private val loadErrorHandlingPolicy: DefaultLoadErrorHandlingPolicy =
-        object : DefaultLoadErrorHandlingPolicy() {
-            override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long {
-                if (loadErrorInfo.errorCount <= Keys.DEFAULT_MAX_RECONNECTION_COUNT && loadErrorInfo.exception is HttpDataSource.HttpDataSourceException) {
-                    return Keys.RECONNECTION_WAIT_INTERVAL
-//            } else {
-//                CoroutineScope(Main).launch {
-//                    player.stop()
-//                }
-                }
-                return C.TIME_UNSET
+    object : DefaultLoadErrorHandlingPolicy() {
+        override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long {
+            if (loadErrorInfo.errorCount <= Keys.DEFAULT_MAX_RECONNECTION_COUNT && loadErrorInfo.exception is HttpDataSource.HttpDataSourceException) {
+                Toast.makeText(
+                    applicationContext,
+                    "Failed to connect to the radio station. Retrying...",
+                    Toast.LENGTH_LONG
+                ).show()
+                return Keys.RECONNECTION_WAIT_INTERVAL
             }
-
-            override fun getMinimumLoadableRetryCount(dataType: Int): Int {
-                return Int.MAX_VALUE
-            }
+            return C.TIME_UNSET
         }
+
+        override fun getMinimumLoadableRetryCount(dataType: Int): Int {
+            return Int.MAX_VALUE
+        }
+    }
 
     private val collectionChangedReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
