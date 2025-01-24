@@ -79,28 +79,40 @@ class PlayerService : MediaLibraryService() {
     private val notificationChannelId = "pscid"
 
     override fun onCreate() {
-        super.onCreate()
-        Timber.tag(TAG).d("onCreatePlayerService: Start")  // Логирование для отслеживания
+    super.onCreate()
+    Timber.tag(TAG).d("onCreatePlayerService: Start")  // Логирование для отслеживания
 
-        // Создание уведомления и запуск сервиса в переднем режиме
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ContextCompat.isBackgroundRestricted(this)) {
+        Timber.tag(TAG).e("App is in restricted background state, cannot start foreground service")
+        return
+    }
+
+    try {
         val notification = createNotification(notificationChannelId)
         startForeground(notificationId, notification)
-
-        collection = FileHelper.readCollection(this)
-        LocalBroadcastManager.getInstance(application).registerReceiver(
-            collectionChangedReceiver,
-            IntentFilter(Keys.ACTION_COLLECTION_CHANGED)
-        )
-        Timber.tag(TAG).d("onCreate: Initializing player and session")
-        initializePlayer()
-        initializeSession()
-        val notificationProvider = CustomNotificationProvider()
-        setMediaNotificationProvider(notificationProvider)
-        metadataHistory = PreferencesHelper.loadMetadataHistory()
-
-        val prefs = getSharedPreferences("PermissionPrefs", MODE_PRIVATE)
-        prefs.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
+    } catch (e: ForegroundServiceStartNotAllowedException) {
+        Timber.tag(TAG).e(e, "Failed to start foreground service")
+        Toast.makeText(this, "Failed to start foreground service", Toast.LENGTH_LONG).show()
+        // Альтернативные способы уведомления пользователя
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(notificationId, notification)
     }
+
+    collection = FileHelper.readCollection(this)
+    LocalBroadcastManager.getInstance(application).registerReceiver(
+        collectionChangedReceiver,
+        IntentFilter(Keys.ACTION_COLLECTION_CHANGED)
+    )
+    Timber.tag(TAG).d("onCreate: Initializing player and session")
+    initializePlayer()
+    initializeSession()
+    val notificationProvider = CustomNotificationProvider()
+    setMediaNotificationProvider(notificationProvider)
+    metadataHistory = PreferencesHelper.loadMetadataHistory()
+
+    val prefs = getSharedPreferences("PermissionPrefs", MODE_PRIVATE)
+    prefs.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
+}
 
     private fun createNotification(channelId: String): Notification {
         // Создание канала уведомлений для Android O и выше
